@@ -38,5 +38,8 @@ DSCEngine smart contract.
  */
 
 contract DecentralizedStableCoin  {
-    //update
+
+    function add() public pure returns(uint) {
+        return 1 + 1;
+    }
 }
