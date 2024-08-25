@@ -22,6 +22,25 @@ https://book.getfoundry.sh/
 3. Collateral: Exogenous (Crypto)
    1. wETH
    2. wBTC
+   
+   
+    Set a Threshold, to let say 150% 
+    $100 ETH -> 75$ ETH
+    $50 DSC
+    IF a user get liquidated, the user shouldn't be allowed to hold the position (collateral <= DSC) 
+    It's always be (collateral > DSC)
+    if someone pay back your minted DSC, they can have all of your collateral in discount.
+    $50 DSC -> $74 ETH
+    if you are under the threshold, someone can liquidate your position and enjoy your extra collateral as an reward.
+
+    Example
+    threshold = 150%
+    $100 ETH collateral -> $74 (Value fall)
+    $50 DSC minted 
+    UNDERCOLLATERIZED!!!
+
+    SOMEBODY - I'll pay $50 DSC to get $74 ETH (your collateral)
+
 
 ### Build
 
