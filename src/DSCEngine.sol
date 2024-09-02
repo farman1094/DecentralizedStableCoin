@@ -60,6 +60,7 @@ contract DSCEngine is ReentrancyGuard {
     error DSCEngine__TransferFailed();
     error DSCEngine__BreaksHealthFactor(uint256 healthFactor);
     error DSCEngine__MintFailed();
+    error DSCEngine__HealthFactorOk();
  
     ///////////////////////
     /// State Variables ///
@@ -212,10 +213,41 @@ contract DSCEngine is ReentrancyGuard {
         }
         i_dsc.burn(amount);
         _revertIfHealthFactorIsBroken(msg.sender); //don't think it would exist
-
-
     }
-    function liquidate() external {}
+
+    // if we do start nearing undercollaterized, we need someone to liquidate positions
+    // $100 ETH backing $50 DSC
+    // $20 ETH backing $50 DSC (now DSC not worth $1
+
+    //$75 ETH backing $50 DSC
+    // Liquidator take $75 ETH backing if burns off the $50 DSC
+
+    // If someone is under collaterized we will pay you to collaterized the.
+
+    /**
+     * @notice this function will liquidate the user's collateral if they are undercollaterized
+     * @param collateral The ERC20 collateral address to liquidated from the user
+     * @param user The user who broken the health factor. Their _healthFactor should below MIN_HEALTH_FACTOR
+     * @param debtToCover The amount of DSC you want to burn to improve user Health's Factor
+     * @notice You can partially liquidate a user
+     * @notice You will get a liquidation bonus for taking the users fund
+     * @notice This function working assumes the protocol will be roughly 200% overcollaterized In order for this to work
+     * @notice A known bug would be if the protocol is 100% or less collaterized, then we would not be able to incentivized the liquidator
+     for e.g -> If the price of the collateral plummeted before anyone could be liquidated. Then 
+     */
+    function liquidate(address collateral, address user, uint256 debtToCover) external moreThanZero(debtToCover) nonReentrant {
+        // check the health factor of the user
+        uint256 startingUserHealthFactor = _healthFactor(user);
+        if(startingUserHealthFactor >= MIN_HEALTH_FACTOR){
+            revert DSCEngine__HealthFactorOk();
+        }
+
+        // we want to burn DSC 
+        // Take their collateral
+        // Bad user: $140 USD, $100 DSC
+        // uint256 tokenAmountDebtCovered = 
+    }
+
     function getHealthFactor() external view {}
 
 
