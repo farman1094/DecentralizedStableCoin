@@ -54,7 +54,7 @@ contract DSCEngineTest is Test {
         vm.startPrank(USER);
         ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
         vm.expectRevert(DSCEngine.DSCEngine__NeedsMoreThanZero.selector);
-        engine.depositCollateral(weth, 10 ether);
+        engine.depositCollateral(weth, 0 );
         vm.stopPrank();
     }
 
