@@ -24,6 +24,11 @@ contract DeployDSC is Script {
         DSCEngine engine = new DSCEngine(tokenAddresses, priceFeedAddresses, address(dsc));
         dsc.transferOwnership(address(engine));
         vm.stopBroadcast();
+
+        vm.label(wethUsdPriceFeed, "WETHOracle");
+        vm.label(wbtcUsdPriceFeed, "WBTCOracle");
+        vm.label(weth, "WETH");
+        vm.label(wbtc, "WBTC");
         return (dsc, engine, helper);
     }
 }
