@@ -70,10 +70,9 @@ contract DSCEngine is ReentrancyGuard {
     uint256 private constant LIQUIDATION_THRESHOLD = 50; //200% overCOLLATERIZED REQUIRED
     uint256 private constant LIQUIDATION_PRECISION = 100;
     uint256 private constant LIQUIDATION_BONUS = 10; //10% bonus
-    uint256 private constant PRECISION = 1e18; 
-    uint256 private constant MIN_HEALTH_FACTOR = 1e18; 
-    uint256 private constant PRICE_PRECISION = 1e8; 
-
+    uint256 private constant PRECISION = 1e18;
+    uint256 private constant MIN_HEALTH_FACTOR = 1e18;
+    uint256 private constant PRICE_PRECISION = 1e8;
 
     mapping(address token => address priceFeed) public s_priceFeeds; //tokenToPriceFeed
     mapping(address user => mapping(address token => uint256 amount)) public s_CollateralDeposited; //userToTokenToCollateral

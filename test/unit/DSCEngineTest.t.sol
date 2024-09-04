@@ -9,6 +9,7 @@ import {DSCEngine} from "src/DSCEngine.sol";
 import {DecentralizedStableCoin} from "src/DecentralizedStableCoin.sol";
 import {HelperConfig} from "script/HelperConfig.s.sol";
 import {ERC20Mock} from "test/mocks/ERC20Mock.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract DSCEngineTest is Test {
     // ETH = 3000
@@ -24,7 +25,7 @@ contract DSCEngineTest is Test {
 
     address public USER = makeAddr("user");
     uint256 public constant AMOUNT_COLLATERAL = 10 ether;
-    uint256 public constant STARTING_USER_BALANCE = 10 ether;
+    uint256 public constant STARTING_USER_BALANCE = 100 ether;
 
     function setUp() public {
         deployer = new DeployDSC();
@@ -90,7 +91,35 @@ contract DSCEngineTest is Test {
         engine.depositCollateral(address(ranToken), 10e18);
         vm.stopPrank();
     }
+    //  function testToRevertDSCEngine__DepositFailed() public {
 
+
+    //     // Mock the `transferFrom` function to return false
+    //     vm.mockCall(
+    //         weth,
+    //         abi.encodeWithSelector(ERC20Mock.transferFrom.selector, USER, address(engine), AMOUNT_COLLATERAL),
+    //         abi.encode(false) // This will cause the transfer to "fail"
+    //     );
+    //     vm.startPrank(USER);
+    //     // Expect the revert with DSCEngine__DepositFailed error
+    //     vm.expectRevert(DSCEngine.DSCEngine__DepositFailed.selector);
+    //     engine.depositCollateral(weth , AMOUNT_COLLATERAL);
+    //     vm.stopPrank();
+    //  }
+function testToRevertDSCEngine__DepositFailed() public {
+    // Mock the `transferFrom` function to return false
+    vm.mockCall(
+        weth,
+        abi.encodeWithSelector(IERC20.transferFrom.selector, USER, address(engine), AMOUNT_COLLATERAL),
+        abi.encode(false) // This will cause the transfer to "fail"
+    );
+    
+    vm.startPrank(USER);
+    // Expect the revert with DSCEngine__DepositFailed error
+    vm.expectRevert(DSCEngine.DSCEngine__DepositFailed.selector);
+    engine.depositCollateral(weth, AMOUNT_COLLATERAL);
+    vm.stopPrank();
+}
     modifier depositCollateral() {
         vm.startPrank(USER);
         ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
@@ -100,20 +129,31 @@ contract DSCEngineTest is Test {
     }
 
     function testCanDepositCollateralAndGetAccountInfo() public depositCollateral {
-        // (uint256 totalDscMinted, uint256 collateralValueInUsd) = engine.getAccountInfromation(USER);
-        // uint256 totalCollateralValueInUsd  = engine.getTokenAmountFromUSD(weth, collateralValueInUsd);
-        // uint256 totalCollateralValueInUsd  = engine.getCollateralValueInUSD(USER);
-        // console.log(collateralValueInUsd, totalDscMinted);
-        uint256 totalCollateralValueInUsd = engine.getCollateralValueInUSD(USER);
-
+        (uint256 totalDscMinted, uint256 collateralValueInUsd) = engine.getAccountInformation(USER);
+        uint256 expectedToken = engine.getTokenAmountFromUSD(weth, collateralValueInUsd);
         uint256 expectedUsdValueShouldBe = 20000e18;
-        // console.log(totalDscMinted);
-        console.log("value returned: ", totalCollateralValueInUsd);
-        // console.log(collateralValueInUsd);
-        // assertEq(totalDscMinted, expectedTotalDscMinted);
-        assertEq(expectedUsdValueShouldBe, totalCollateralValueInUsd);
+        uint256 expectedDscMinted = 0;
+
+        assertEq(totalDscMinted, expectedDscMinted);
+        assertEq(expectedUsdValueShouldBe, collateralValueInUsd);
+        assertEq(expectedToken, AMOUNT_COLLATERAL);
     }
 
-    // bc dekh ho rha
-    // jbhi to value arrhi console log ki
+
+    /////////////////////////////
+    //   Health factor Test   ///
+    /////////////////////////////
+    function testToRevertBreaksHealthFactor() public depositCollateral {
+        uint256 amounToMint = 25000e18;
+        vm.startPrank(USER);
+        
+        // Issue because of output in custom error
+        // vm.expectRevert(DSCEngine.DSCEngine__BreaksHealthFactor.selector);
+        vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__BreaksHealthFactor.selector, 400000000000000000));
+
+        engine.mintDsc(amounToMint);
+        console.log("DSC minted: ", amounToMint);
+        vm.stopPrank();
+    }
+
 }
