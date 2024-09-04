@@ -327,9 +327,11 @@ contract DSCEngine is ReentrancyGuard {
         // 1000 ETH * 50  = 50,000 / 100 = (500 / 100) > 1
         // 500 * 1e18 / 100
         // ---------------------------------------------------------------------------------------------------------------------
-        /**@dev @notice must check @author  */
-        if(totalDscMinted == 0){
-            return totalDscMinted = 1; 
+        /**
+         * @dev @notice must check @author
+         */
+        if (totalDscMinted == 0) {
+            return totalDscMinted = PRECISION;
         }
         // ---------------------------------------------------------------------------------------------------------------------
         return (collateralAdjustedForThreshold * PRECISION) / totalDscMinted;
@@ -340,6 +342,7 @@ contract DSCEngine is ReentrancyGuard {
     // Revert if Health Factor is broken
     function _revertIfHealthFactorIsBroken(address user) internal view {
         uint256 userHealthFactor = _healthFactor(user);
+        console.log("userHealthFactor",userHealthFactor);
         if (userHealthFactor < MIN_HEALTH_FACTOR) {
             revert DSCEngine__BreaksHealthFactor(userHealthFactor);
         }

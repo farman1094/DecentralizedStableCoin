@@ -143,21 +143,71 @@ contract DSCEngineTest is Test {
         assertEq(expectedUsdValueShouldBe, collateralValueInUsd);
         assertEq(expectedToken, AMOUNT_COLLATERAL);
     }
+
+    /////////////////////////////
+    /// Mint And Deposit Test ///
+    /////////////////////////////
+    function testDepositCollateralAndMintDSC() public {
+        vm.startPrank(USER);
+        ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
+
+        engine.depositCollateralAndMintDSC(weth, AMOUNT_COLLATERAL, AMOUNT_COLLATERAL);
+        (uint256 totalDscMinted, uint256 collateralValueInUsd) = engine.getAccountInformation(USER);
+        uint256 balAfterDeposit = engine.getUsdValue(weth, 10e18);
+        uint256 balAfterDepositDSC = 10e18;
+        assertEq(collateralValueInUsd, balAfterDeposit);
+        assertEq(totalDscMinted, balAfterDepositDSC);
+
+        vm.stopPrank();
+    }
+    function testDepositCollateralAndMintDscRevertDSCEngine__BreaksHealthFactor() public {
+        vm.startPrank(USER);
+        ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
+        // vm.expectRevert(DSCEngine.DSCEngine__BreaksHealthFactor.selector,5e17);
+        vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__BreaksHealthFactor.selector, 5e17));
+
+
+        engine.depositCollateralAndMintDSC(weth, AMOUNT_COLLATERAL, 20000e18);
+        vm.stopPrank();
+    }
+
     /////////////////////////////
     // Redeem Collateral Test ///
     /////////////////////////////
 
+    function testRevertsIfRedeemedCollateralIsZero() public depositCollateral {
+        vm.startPrank(USER);
+        vm.expectRevert(DSCEngine.DSCEngine__NeedsMoreThanZero.selector);
+        engine.redeemCollateral(weth, 0);
+        vm.stopPrank();
+    }
+
     function testRedeemCollateral() public depositCollateral {
         vm.startPrank(USER);
-        engine.redeemCollateral(weth, AMOUNT_COLLATERAL);
-        uint256 balAfterRedeem = 0;
-        // engine.redeemCollateral(weth, 9 ether);
-        // uint256 balAfterRedeem = engine.getUsdValue(weth, 1e18);
+        // engine.redeemCollateral(weth, AMOUNT_COLLATERAL);
+        // uint256 balAfterRedeem = 0;
+        engine.redeemCollateral(weth, 9 ether);
+        uint256 balAfterRedeem = engine.getUsdValue(weth, 1e18);
         (, uint256 collaterlValueInusd) = engine.getAccountInformation(USER);
         assertEq(collaterlValueInusd, balAfterRedeem);
         vm.stopPrank();
     }
-    
+
+    function testToRevertInRedeemDSCEngine__TransferFailed() public depositCollateral {
+        // Mock the `transferFrom` function to return fale
+        vm.mockCall(
+            weth,
+            abi.encodeWithSelector(ERC20Mock(weth).transfer.selector, USER, AMOUNT_COLLATERAL),
+            abi.encode(false) // This will cause the transfer to "fail"
+        );
+        //bool success = IERC20(tokenCollateralAddress).transfer(to, amountCollateral);
+        //bool success = IERC20(tokenCollateralAddress).transferFrom(msg.sender, address(this), amountCollateral);
+
+        vm.startPrank(USER);
+        vm.expectRevert(DSCEngine.DSCEngine__TransferFailed.selector);
+        engine.redeemCollateral(weth, AMOUNT_COLLATERAL);
+        vm.stopPrank();
+    }
 
     // testRedeemCollateralFail
 
@@ -177,6 +227,3 @@ contract DSCEngineTest is Test {
         vm.stopPrank();
     }
 }
-
-
- 
