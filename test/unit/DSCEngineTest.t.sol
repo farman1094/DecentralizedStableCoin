@@ -73,6 +73,24 @@ contract DSCEngineTest is Test {
         assertEq(actualAmount, expectedAmount);
     }
 
+    //////////////////////////
+    //   Mint DSC Test     ///
+    //////////////////////////
+    function testMinting() public depositCollateral {
+        vm.startPrank(USER);
+        uint256 valueOfTokenInUSD = engine.getUsdValue(weth, AMOUNT_COLLATERAL);
+        uint256 liq_threshold = 50;
+        uint256 liq_precision = 100;
+        uint256 rightValueWithThreshold = (valueOfTokenInUSD * liq_threshold) / liq_precision;
+        uint256 expectedDscMinted = 10000e18;
+        uint256 expectedUsdCollateral = 20000e18;
+        engine.mintDsc(rightValueWithThreshold);
+        (uint256 actualDSCminted, uint256 collateralValueInUsd) = engine.getAccountInformation(USER);
+        assertEq(expectedDscMinted, actualDSCminted);
+        assertEq(expectedUsdCollateral, collateralValueInUsd);
+        vm.stopPrank();
+    }
+
     /////////////////////////////
     // Depost Collateral Test ///
     /////////////////////////////
@@ -91,35 +109,22 @@ contract DSCEngineTest is Test {
         engine.depositCollateral(address(ranToken), 10e18);
         vm.stopPrank();
     }
-    //  function testToRevertDSCEngine__DepositFailed() public {
 
+    function testToRevertDSCEngine__DepositFailed() public {
+        // Mock the `transferFrom` function to return false
+        vm.mockCall(
+            weth,
+            abi.encodeWithSelector(IERC20.transferFrom.selector, USER, address(engine), AMOUNT_COLLATERAL),
+            abi.encode(false) // This will cause the transfer to "fail"
+        );
 
-    //     // Mock the `transferFrom` function to return false
-    //     vm.mockCall(
-    //         weth,
-    //         abi.encodeWithSelector(ERC20Mock.transferFrom.selector, USER, address(engine), AMOUNT_COLLATERAL),
-    //         abi.encode(false) // This will cause the transfer to "fail"
-    //     );
-    //     vm.startPrank(USER);
-    //     // Expect the revert with DSCEngine__DepositFailed error
-    //     vm.expectRevert(DSCEngine.DSCEngine__DepositFailed.selector);
-    //     engine.depositCollateral(weth , AMOUNT_COLLATERAL);
-    //     vm.stopPrank();
-    //  }
-function testToRevertDSCEngine__DepositFailed() public {
-    // Mock the `transferFrom` function to return false
-    vm.mockCall(
-        weth,
-        abi.encodeWithSelector(IERC20.transferFrom.selector, USER, address(engine), AMOUNT_COLLATERAL),
-        abi.encode(false) // This will cause the transfer to "fail"
-    );
-    
-    vm.startPrank(USER);
-    // Expect the revert with DSCEngine__DepositFailed error
-    vm.expectRevert(DSCEngine.DSCEngine__DepositFailed.selector);
-    engine.depositCollateral(weth, AMOUNT_COLLATERAL);
-    vm.stopPrank();
-}
+        vm.startPrank(USER);
+        // Expect the revert with DSCEngine__DepositFailed error
+        vm.expectRevert(DSCEngine.DSCEngine__DepositFailed.selector);
+        engine.depositCollateral(weth, AMOUNT_COLLATERAL);
+        vm.stopPrank();
+    }
+
     modifier depositCollateral() {
         vm.startPrank(USER);
         ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
@@ -138,7 +143,23 @@ function testToRevertDSCEngine__DepositFailed() public {
         assertEq(expectedUsdValueShouldBe, collateralValueInUsd);
         assertEq(expectedToken, AMOUNT_COLLATERAL);
     }
+    /////////////////////////////
+    // Redeem Collateral Test ///
+    /////////////////////////////
 
+    function testRedeemCollateral() public depositCollateral {
+        vm.startPrank(USER);
+        engine.redeemCollateral(weth, AMOUNT_COLLATERAL);
+        uint256 balAfterRedeem = 0;
+        // engine.redeemCollateral(weth, 9 ether);
+        // uint256 balAfterRedeem = engine.getUsdValue(weth, 1e18);
+        (, uint256 collaterlValueInusd) = engine.getAccountInformation(USER);
+        assertEq(collaterlValueInusd, balAfterRedeem);
+        vm.stopPrank();
+    }
+    
+
+    // testRedeemCollateralFail
 
     /////////////////////////////
     //   Health factor Test   ///
@@ -146,14 +167,16 @@ function testToRevertDSCEngine__DepositFailed() public {
     function testToRevertBreaksHealthFactor() public depositCollateral {
         uint256 amounToMint = 25000e18;
         vm.startPrank(USER);
-        
+
         // Issue because of output in custom error
         // vm.expectRevert(DSCEngine.DSCEngine__BreaksHealthFactor.selector);
-        vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__BreaksHealthFactor.selector, 400000000000000000));
+        vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__BreaksHealthFactor.selector, 4e17));
 
         engine.mintDsc(amounToMint);
         console.log("DSC minted: ", amounToMint);
         vm.stopPrank();
     }
-
 }
+
+
+ 

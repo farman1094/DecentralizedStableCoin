@@ -326,6 +326,12 @@ contract DSCEngine is ReentrancyGuard {
         // $1000 ETH / 100 DSC
         // 1000 ETH * 50  = 50,000 / 100 = (500 / 100) > 1
         // 500 * 1e18 / 100
+        // ---------------------------------------------------------------------------------------------------------------------
+        /**@dev @notice must check @author  */
+        if(totalDscMinted == 0){
+            return totalDscMinted = 1; 
+        }
+        // ---------------------------------------------------------------------------------------------------------------------
         return (collateralAdjustedForThreshold * PRECISION) / totalDscMinted;
         // return (collateralValueInUsd / totalDscMinted)
     }
