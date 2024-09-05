@@ -153,6 +153,7 @@ contract DSCEngineTest is Test {
 
         engine.depositCollateralAndMintDSC(weth, AMOUNT_COLLATERAL, AMOUNT_COLLATERAL);
         (uint256 totalDscMinted, uint256 collateralValueInUsd) = engine.getAccountInformation(USER);
+
         uint256 balAfterDeposit = engine.getUsdValue(weth, 10e18);
         uint256 balAfterDepositDSC = 10e18;
         assertEq(collateralValueInUsd, balAfterDeposit);
@@ -160,11 +161,16 @@ contract DSCEngineTest is Test {
 
         vm.stopPrank();
     }
+
     function testDepositCollateralAndMintDscRevertDSCEngine__BreaksHealthFactor() public {
         vm.startPrank(USER);
         ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
         // vm.expectRevert(DSCEngine.DSCEngine__BreaksHealthFactor.selector,5e17);
-        vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__BreaksHealthFactor.selector, 5e17));
+        uint256 collateralValueInUsd = engine.getUsdValue(weth, AMOUNT_COLLATERAL);
+        uint256 healthFactor = engine.calculateHealthFactor(20000e18, collateralValueInUsd);
+        // console.log("Health Factor: ", healthFactor);
+
+        vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__BreaksHealthFactor.selector, healthFactor));
         engine.depositCollateralAndMintDSC(weth, AMOUNT_COLLATERAL, 20000e18);
         vm.stopPrank();
     }
@@ -215,10 +221,12 @@ contract DSCEngineTest is Test {
     function testToRevertBreaksHealthFactor() public depositCollateral {
         uint256 amounToMint = 25000e18;
         vm.startPrank(USER);
+        uint256 collateralValueInUsd = engine.getUsdValue(weth, AMOUNT_COLLATERAL);
+        uint256 healthFactor = engine.calculateHealthFactor(amounToMint, collateralValueInUsd);
 
         // Issue because of output in custom error
         // vm.expectRevert(DSCEngine.DSCEngine__BreaksHealthFactor.selector);
-        vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__BreaksHealthFactor.selector, 4e17));
+        vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__BreaksHealthFactor.selector, healthFactor));
 
         engine.mintDsc(amounToMint);
         console.log("DSC minted: ", amounToMint);
@@ -227,24 +235,30 @@ contract DSCEngineTest is Test {
     ////////////////////////
     //   Burn DSC Test   ///
     ////////////////////////
-        modifier depositCollateralAndMintDSC() {
+
+    modifier depositCollateralAndMintDSC() {
         vm.startPrank(USER);
         ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
         engine.depositCollateralAndMintDSC(weth, AMOUNT_COLLATERAL, AMOUNT_COLLATERAL);
-        dsc.approve(address(engine),AMOUNT_COLLATERAL);
+        dsc.approve(address(engine), AMOUNT_COLLATERAL);
         vm.stopPrank();
         // engine.depositCollateral(weth, AMOUNT_COLLATERAL);
         // ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
         _;
     }
 
-    function testToCheckIfBurnDscIsWorking() public depositCollateralAndMintDSC{
-       
+    function testToCheckIfBurnDscIsWorking() public depositCollateralAndMintDSC {
         vm.startPrank(USER);
-        (uint256 totalDscMinted, ) = engine.getAccountInformation(USER);
         engine.burnDsc(AMOUNT_COLLATERAL);
-        (uint256 AfterBurningAmount, ) = engine.getAccountInformation(USER);
+        (uint256 AfterBurningAmount,) = engine.getAccountInformation(USER);
         uint256 expecBalAfterBurning = 0;
-        assertEq(AfterBurningAmount,expecBalAfterBurning);
+        assertEq(AfterBurningAmount, expecBalAfterBurning);
     }
+
+
+
+
+
+
+    
 }

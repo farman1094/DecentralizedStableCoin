@@ -300,42 +300,18 @@ contract DSCEngine is ReentrancyGuard {
         }
     }
 
-    function _getAccountInformation(address user)
-        private
-        view
-        returns (uint256 totalDscMinted, uint256 collateralValueInUsd)
-    {
-        totalDscMinted = s_DSCMinted[msg.sender];
-        collateralValueInUsd = getCollateralValueInUSD(user);
-        return (totalDscMinted, collateralValueInUsd);
-    }
+   
+    //////////////////////////////
+    // Private & Internal View & Pure Functions
+    //////////////////////////////
 
     /**
      * @notice returns how close to liquidation a user is
      * If a user goes below 1, then they can liquidated
      */
     function _healthFactor(address user) internal view returns (uint256) {
-        // total dsc minted
-        // total collateral value
-
-        (uint256 totalDscMinted, uint256 collateralValueInUsd) = _getAccountInformation(user);
-        uint256 collateralAdjustedForThreshold = (collateralValueInUsd * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
-        // 1000 ETH * 50  = 50,000 / 100 = 500
-        // 150 * 50 = 7500 / 100 = (75 / 100) < 1
-
-        // $1000 ETH / 100 DSC
-        // 1000 ETH * 50  = 50,000 / 100 = (500 / 100) > 1
-        // 500 * 1e18 / 100
-        // ---------------------------------------------------------------------------------------------------------------------
-        /**
-         * @dev @notice must check @author
-         */
-        if (totalDscMinted == 0) {
-            return totalDscMinted = PRECISION;
-        }
-        // ---------------------------------------------------------------------------------------------------------------------
-        return (collateralAdjustedForThreshold * PRECISION) / totalDscMinted;
-        // return (collateralValueInUsd / totalDscMinted)
+      (uint256 totalDscMinted, uint256 collateralValueInUsd) = _getAccountInformation(user);
+        return _calculateHealthFactor(totalDscMinted, collateralValueInUsd);
     }
 
     // check Health Factor(do they have enough collateral)
@@ -347,6 +323,50 @@ contract DSCEngine is ReentrancyGuard {
             revert DSCEngine__BreaksHealthFactor(userHealthFactor);
         }
     }
+
+     function _getAccountInformation(address user)
+        private
+        view
+        returns (uint256 totalDscMinted, uint256 collateralValueInUsd)
+    {
+        totalDscMinted = s_DSCMinted[msg.sender];
+        collateralValueInUsd = getCollateralValueInUSD(user);
+        return (totalDscMinted, collateralValueInUsd);
+    }
+
+    function _calculateHealthFactor(uint256 totalDscMinted, uint256 collateralValueInUsd)
+        internal
+        pure
+        returns (uint256)
+    {
+        if (totalDscMinted == 0) {
+            return type(uint256).max;
+        }
+        uint256 collateralAdjustedForThreshold = (collateralValueInUsd * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
+        return (collateralAdjustedForThreshold * PRECISION) / totalDscMinted;
+    }
+    ////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
+    // External & Public View & Pure Functions
+    ////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
+
+    function getAccountInformation(address user)
+        external
+        view
+        returns (uint256 totalDscMinted, uint256 collateralValueInUsd)
+    {
+        return _getAccountInformation(user);
+    }
+
+    function calculateHealthFactor(uint256 totalDscMinted, uint256 collateralValueInUsd)
+        external
+        pure
+        returns (uint256)
+    {
+        return _calculateHealthFactor(totalDscMinted, collateralValueInUsd);
+    }
+
     //////////////////////////
     // Public view function///
     /////////////////////////
@@ -382,12 +402,5 @@ contract DSCEngine is ReentrancyGuard {
         return (uint256(price) * amount) / PRICE_PRECISION; // (1000 * 1e8 * (1e10)) * PRECISION1000 * 1e18
     }
 
-    function getAccountInformation(address user)
-        external
-        view
-        returns (uint256 totalDscMinted, uint256 collateralValueInUsd)
-    {
-        (totalDscMinted, collateralValueInUsd) = _getAccountInformation(user);
-        return (totalDscMinted, collateralValueInUsd);
-    }
+ 
 }

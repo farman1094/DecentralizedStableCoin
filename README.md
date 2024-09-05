@@ -42,6 +42,10 @@ https://book.getfoundry.sh/
     SOMEBODY - I'll pay $50 DSC to get $74 ETH (your collateral)
 
 
+
+    What are our invariants/properties?
+
+
 ### Build
 
 ```shell
