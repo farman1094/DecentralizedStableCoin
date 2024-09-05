@@ -165,8 +165,6 @@ contract DSCEngineTest is Test {
         ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
         // vm.expectRevert(DSCEngine.DSCEngine__BreaksHealthFactor.selector,5e17);
         vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__BreaksHealthFactor.selector, 5e17));
-
-
         engine.depositCollateralAndMintDSC(weth, AMOUNT_COLLATERAL, 20000e18);
         vm.stopPrank();
     }
@@ -225,5 +223,28 @@ contract DSCEngineTest is Test {
         engine.mintDsc(amounToMint);
         console.log("DSC minted: ", amounToMint);
         vm.stopPrank();
+    }
+    ////////////////////////
+    //   Burn DSC Test   ///
+    ////////////////////////
+        modifier depositCollateralAndMintDSC() {
+        vm.startPrank(USER);
+        ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
+        engine.depositCollateralAndMintDSC(weth, AMOUNT_COLLATERAL, AMOUNT_COLLATERAL);
+        dsc.approve(address(engine),AMOUNT_COLLATERAL);
+        vm.stopPrank();
+        // engine.depositCollateral(weth, AMOUNT_COLLATERAL);
+        // ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
+        _;
+    }
+
+    function testToCheckIfBurnDscIsWorking() public depositCollateralAndMintDSC{
+       
+        vm.startPrank(USER);
+        (uint256 totalDscMinted, ) = engine.getAccountInformation(USER);
+        engine.burnDsc(AMOUNT_COLLATERAL);
+        (uint256 AfterBurningAmount, ) = engine.getAccountInformation(USER);
+        uint256 expecBalAfterBurning = 0;
+        assertEq(AfterBurningAmount,expecBalAfterBurning);
     }
 }

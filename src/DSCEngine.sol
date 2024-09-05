@@ -342,7 +342,7 @@ contract DSCEngine is ReentrancyGuard {
     // Revert if Health Factor is broken
     function _revertIfHealthFactorIsBroken(address user) internal view {
         uint256 userHealthFactor = _healthFactor(user);
-        console.log("userHealthFactor",userHealthFactor);
+        // console.log("userHealthFactor",userHealthFactor);
         if (userHealthFactor < MIN_HEALTH_FACTOR) {
             revert DSCEngine__BreaksHealthFactor(userHealthFactor);
         }
