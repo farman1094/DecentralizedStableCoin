@@ -39,8 +39,7 @@ contract Invariants is StdInvariant, Test {
         // targetContract(address(engine));
         handler = new Handler(engine, dsc);
         targetContract(address(handler));
-        // don't call redeem collateral unless there is collateral to redeem 
-
+        // don't call redeem collateral unless there is collateral to redeem
     }
 
     function invariant_protocolMustHaveMoreValueThanTotalSupply() public view {

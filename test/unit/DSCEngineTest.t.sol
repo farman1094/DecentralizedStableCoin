@@ -255,11 +255,9 @@ contract DSCEngineTest is Test {
         assertEq(AfterBurningAmount, expecBalAfterBurning);
     }
 
-    function testToGetViewFunction() public view  {
-        address [] memory tokens = engine.getCollateralTokens();
+    function testToGetViewFunction() public view {
+        address[] memory tokens = engine.getCollateralTokens();
         console.log("Tokens: ", tokens[0]);
         console.log("Tokens2: ", tokens[1]);
-    
     }
-
 }
