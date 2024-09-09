@@ -255,10 +255,24 @@ contract DSCEngineTest is Test {
         assertEq(AfterBurningAmount, expecBalAfterBurning);
     }
 
+    // function testToRevertInBurnDSCEngine__TransferFailed() public depositCollateral {
+    //     // Mock the `transferFrom` function to return fale
+    //     // ERC20Mock(weth)
+    //     address AddrDsc = address(dsc);
+    //     vm.mockCall(
+    //         dsc,
+    //         abi.encodeWithSelector(ERC20Mock(AddrDsc).transfer.selector, USER, AMOUNT_COLLATERAL),
+    //         abi.encode(false) // This will cause the transfer to "fail"
+    //     );
+    //     //bool success = IERC20(tokenCollateralAddress).transfer(to, amountCollateral);
+    //     //bool success = IERC20(tokenCollateralAddress).transferFrom(msg.sender, address(this), amountCollateral);
+
+    //     vm.startPrank(USER);
+    //     vm.expectRevert(DSCEngine.DSCEngine__TransferFailed.selector);
+    //     engine.burnDsc( AMOUNT_COLLATERAL);
+    //     vm.stopPrank();
+    // }
+}
 
 
 //update
-
-
-    
-}
