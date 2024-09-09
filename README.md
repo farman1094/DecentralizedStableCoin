@@ -44,6 +44,9 @@ https://book.getfoundry.sh/
 
 
     What are our invariants/properties?
+    1. The total supply of the DSC should be less than the total value of collateral
+
+    2. Getter view function should never revert <- evergreen Invarian
 
 
 ### Build
