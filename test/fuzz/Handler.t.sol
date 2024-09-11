@@ -30,6 +30,31 @@ contract Handler is Test {
         wbtc = ERC20Mock(tokens[1]);
     }
 
+
+    // mint dsc
+    function mintDsc(uint256 amount) public {
+        vm.startPrank(msg.sender);
+         (uint256 totalDscMinted, uint256 collateralValueInUsd) = engine.getAccountInformation(msg.sender);
+        // if(amount > collateralValueInUsd) return;
+        //doubt
+        int256 maxDscToMint = (int256(collateralValueInUsd) / 2) - int256(totalDscMinted);
+        console.log("amount", amount);
+        console.log("collateralValueInUsd",collateralValueInUsd);
+        console.log("totalDscMinted",totalDscMinted);
+        if(maxDscToMint < 0) {
+            return;
+        }
+        amount = bound(amount, 0, uint256(maxDscToMint));
+        console.log("boundAmount", amount);
+        if(amount == 0){
+            return;
+        }
+        // startPrank was here before causing the errors 
+        engine.mintDsc(amount);
+        vm.stopPrank();
+
+    }
+
     // redeem Collateral <-
     function depositCollateral(uint256 collateralSeed, uint256 amountCollateral) public {
         amountCollateral = bound(amountCollateral, 1, MAX_DEPOSIT_SIZE);
@@ -55,8 +80,8 @@ contract Handler is Test {
     function redeemCollateral(uint256 collateralSeed, uint256 amountCollateral) public {
         ERC20Mock collateral = _getCollateralFromSeed(collateralSeed);
         uint256 maxCollateralToReddem = engine.getCollateralBalanceOfUser(address(collateral), msg.sender);
-        console.log("maxCollateralToReddem", maxCollateralToReddem);
-        console.log("amountCollateral", amountCollateral);
+        // console.log("maxCollateralToReddem", maxCollateralToReddem);
+        // console.log("amountCollateral", amountCollateral);
         if (maxCollateralToReddem == 0) {
             return;
         }
@@ -78,5 +103,7 @@ contract Handler is Test {
     //     }
     //     engine.redeemCollateral(address(collateral), amountCollateral);
     // }    
+
+
 
 }
