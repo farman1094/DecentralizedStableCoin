@@ -48,11 +48,39 @@ contract Invariants is StdInvariant, Test {
         uint256 totalWbtcDeposited = IERC20(wbtc).balanceOf(address(engine));
         uint256 wethValue = engine.getUsdValue(weth, totalWethDeposited);
         uint256 wbtcValue = engine.getUsdValue(wbtc, totalWbtcDeposited);
-
         console.log("totalSupply", totalSupply);
         console.log("wethValue", wethValue);
         console.log("wbtcValue", wbtcValue);
+        console.log("totalWethDeposited", totalWethDeposited);
+        console.log("totalWbtcDeposited", totalWbtcDeposited);
+        console.log("deposittimesCalled", handler.deposittimesCalled());
+        console.log("halfMinttimesCalled", handler.halfMinttimesCalled());
+        console.log("MinttimesCalled", handler.MinttimesCalled());
+        console.log("halfredeemtimesCalled", handler.halfredeemtimesCalled());
+        console.log("redeemtimesCalled", handler.redeemtimesCalled());
 
         assert(wethValue + wbtcValue >= totalSupply);
+    }
+
+    function invariant__GetterViewFunctionShouldNeverRevert() public view {
+        engine.getTokenAmountFromUSD(weth, 1);
+        engine.getTokenAmountFromUSD(wbtc, 1);
+        engine.getAccountCollateralValue(address(this));
+        engine.getAccountInformation(address(this));
+        engine.calculateHealthFactor(5, 10);
+        engine.getUsdValue(weth, 1);
+        engine.getUsdValue(wbtc, 1);
+        engine.getCollateralTokenPriceFeed(weth);
+        engine.getCollateralBalanceOfUser(address(this), weth);
+        engine.getHealthFactor(address(this));
+        engine.getDsc();
+        engine.getCollateralTokens();
+        engine.getMinHealthFactor();
+        engine.getPrecision();
+        engine.getPricePrecision();
+        engine.getLiquidationThreshold();
+        engine.getLiquidationBonus();
+        engine.getAdditionalPricePrecision();
+        engine.getLiquidationPrecision();
     }
 }
