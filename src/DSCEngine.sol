@@ -31,6 +31,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {console} from "forge-std/console.sol";
 import {AggregatorV3Interface} from
     "lib/chainlink-brownie-contracts/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import {OracleLib} from "./libraries/OracleLib.sol";
 // import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 /**
@@ -62,10 +63,16 @@ contract DSCEngine is ReentrancyGuard {
     error DSCEngine__MintFailed();
     error DSCEngine__HealthFactorOk();
     error DSCEngine__HealthFactorNotImproved();
+
+    ///////////
+    // Types //
+    ///////////
+    using OracleLib for AggregatorV3Interface;
+
+
     ///////////////////////
     /// State Variables ///
     ///////////////////////
-
     uint256 private constant ADDITIONAL_PRICE_PRECISION = 1e10;
     uint256 private constant LIQUIDATION_THRESHOLD = 50; //200% overCOLLATERIZED REQUIRED
     uint256 private constant LIQUIDATION_PRECISION = 100;
@@ -329,7 +336,7 @@ contract DSCEngine is ReentrancyGuard {
     function _getUsdValue(address token, uint256 amount) private view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
         // ( ,int256 price,,,) = priceFeed.latestRoundData()
-        (, int256 price,,,) = priceFeed.latestRoundData();
+        (, int256 price,,,) = priceFeed.staleCheckLatestRoundData();
 
         // 1 ETH = $1000
         // Price return from the CL = 1000 * 1e8
@@ -365,7 +372,7 @@ contract DSCEngine is ReentrancyGuard {
 
     function getTokenAmountFromUSD(address token, uint256 usdAmountInWei) public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
-        (, int256 price,,,) = priceFeed.latestRoundData();
+        (, int256 price,,,) = priceFeed.staleCheckLatestRoundData();
         // $/ETH ETH?
         // $2000 / ETH. $1000 = 0.5 ETH
         return (usdAmountInWei * PRECISION) / (uint256(price) * ADDITIONAL_PRICE_PRECISION);
