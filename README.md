@@ -13,7 +13,6 @@ This project is consist of 2 contracts.
 
 - DSCEngine: The core smart contract that manages the issuance, redemption, and liquidation of DSC tokens. It ensures the system remains solvent by enforcing collateralization ratios, handling liquidation events, and enabling users to mint DSC by locking up collateral.
 
-Here's an expanded version with additional details:
 
 1. **Stablecoin Pegged to $1.00**  
    - The stablecoin is anchored to maintain a $1.00 value, using real-time price feeds from Chainlink to track ETH and BTC market prices.  
@@ -27,19 +26,19 @@ Here's an expanded version with additional details:
    - The stablecoin is backed by exogenous assets, specifically wrapped Ethereum (wETH) and wrapped Bitcoin (wBTC).  
    - This ensures that the system leverages well-established cryptocurrencies, enhancing trust and stability while reducing volatility risks associated with other assets.
 
-## Collateral Used
+### Collateral Used
 **wETH (Wrapped Ether)**: wETH is an ERC-20 token that represents Ether (ETH) on the Ethereum blockchain. Since ETH itself does not conform to the ERC-20 standard, wETH is created to allow ETH to be used within decentralized finance (DeFi) applications and smart contracts that require ERC-20 tokens. Users can easily wrap and unwrap ETH to wETH at a 1:1 ratio.
 
 **wBTC (Wrapped Bitcoin)**: wBTC is an ERC-20 token that represents Bitcoin (BTC) on the Ethereum blockchain. By wrapping BTC, users can bring the liquidity and value of Bitcoin into the Ethereum ecosystem, enabling them to participate in DeFi protocols. Each wBTC is backed 1:1 by actual Bitcoin, held in a reserve by custodians.
 
 
-### Key Concepts:
+## Key Concepts:
 - **Threshold**: This is the minimum collateralization ratio, set to **200%** in this case. It means the value of your collateral must be at least **twice** the amount of DSC you've minted.
 - **Collateral**: This is the asset (e.g., ETH) you're putting up to mint DSC.
 - **DSC**: The debt you’ve minted (like a loan against your collateral).
 - **Liquidation**: If the value of your collateral drops below the threshold, someone can pay off your DSC and claim your collateral at a discount.
 
-## Basic Scenario:
+### Basic Scenario:
 
 1. **Threshold = 200%**
     - This means: You need **$200 worth of collateral** for every **$100 of DSC**.
@@ -59,9 +58,7 @@ Here's an expanded version with additional details:
 3. **Price Drop**:
     - The value of your collateral drops from **$100 ETH** to **$90 ETH**.
     - Now, your collateralization ratio is:
-        \[
-        \frac{90}{50} = 180\%
-        \]
+        \[\frac{90}{50} = 180\%\]
     - This is **below the 200% threshold**, meaning your position is **undercollateralized** and open to liquidation.
 
 4. **Liquidation**:
@@ -73,7 +70,7 @@ Here's an expanded version with additional details:
         - So, they get a total of **$55 worth of ETH** (since $5 is the 10% bonus).
 
 
-## Worked Example:
+### Worked Example:
 - **Before Liquidation**:
     - You hold **$90 ETH** as collateral.
     - You owe **$50 DSC**.
