@@ -1,6 +1,6 @@
-### About
-
 ## DeFi StableCoin 
+
+### About
 The Decentralized Stablecoin (DSC) project is a secure, trustless, and permissionless stablecoin protocol designed to maintain a stable value while being backed by a pool of decentralized collateral. Unlike traditional stablecoins, DSC is not reliant on fiat reserves but is instead backed by over-collateralized assets like Ethereum.
 
 This project is consist of 2 contracts. 
@@ -26,13 +26,11 @@ Here's an expanded version with additional details:
 3. **Crypto Collateral (Exogenous)**  
    - The stablecoin is backed by exogenous assets, specifically wrapped Ethereum (wETH) and wrapped Bitcoin (wBTC).  
    - This ensures that the system leverages well-established cryptocurrencies, enhancing trust and stability while reducing volatility risks associated with other assets.
-  ---
 
 ## Collateral Used
 **wETH (Wrapped Ether)**: wETH is an ERC-20 token that represents Ether (ETH) on the Ethereum blockchain. Since ETH itself does not conform to the ERC-20 standard, wETH is created to allow ETH to be used within decentralized finance (DeFi) applications and smart contracts that require ERC-20 tokens. Users can easily wrap and unwrap ETH to wETH at a 1:1 ratio.
 
 **wBTC (Wrapped Bitcoin)**: wBTC is an ERC-20 token that represents Bitcoin (BTC) on the Ethereum blockchain. By wrapping BTC, users can bring the liquidity and value of Bitcoin into the Ethereum ecosystem, enabling them to participate in DeFi protocols. Each wBTC is backed 1:1 by actual Bitcoin, held in a reserve by custodians.
----
 
 
 ### Key Concepts:
@@ -40,7 +38,6 @@ Here's an expanded version with additional details:
 - **Collateral**: This is the asset (e.g., ETH) you're putting up to mint DSC.
 - **DSC**: The debt you’ve minted (like a loan against your collateral).
 - **Liquidation**: If the value of your collateral drops below the threshold, someone can pay off your DSC and claim your collateral at a discount.
----
 
 ## Basic Scenario:
 
@@ -56,10 +53,9 @@ Here's an expanded version with additional details:
         \]
     - This is safe because your collateral value is above the required threshold.
 
----
+
 
 ### Liquidation Scenario:
-
 3. **Price Drop**:
     - The value of your collateral drops from **$100 ETH** to **$90 ETH**.
     - Now, your collateralization ratio is:
@@ -76,10 +72,8 @@ Here's an expanded version with additional details:
         - **10% bonus in collateral** as a reward for liquidating (incentive).
         - So, they get a total of **$55 worth of ETH** (since $5 is the 10% bonus).
 
----
 
-### Worked Example:
-
+## Worked Example:
 - **Before Liquidation**:
     - You hold **$90 ETH** as collateral.
     - You owe **$50 DSC**.
