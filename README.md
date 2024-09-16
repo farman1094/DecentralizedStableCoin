@@ -85,25 +85,25 @@ This project is consist of 2 contracts.
     - The liquidator walks away with **$55 ETH**, leaving you with only **$35 ETH** (since you were undercollateralized).
 
 ### Layout of Contract:
- **version**
- **imports**
- **interfaces, libraries, contracts**
- **errors**
- **Type declarations**
- **State variables**
- **Events**
- **Modifiers** 
- **Functions**
+- version  
+- imports
+- interfaces, libraries, contracts 
+- errors
+- Type declarations  
+- State variables  
+- Events 
+- Modifiers  
+- Functions
 
 ### Layout of Functions:
-**constructor**
-**receive function (if exists)**
-**fallback function (if exists)**
-**external**
-**public**
-**internal**
-**private**
-**view & pure functions**
+**constructor**  
+**receive function (if exists)**  
+**fallback function (if exists)**  
+**external**  
+**public**  
+**internal**  
+**private**  
+**view & pure functions**  
   
 ## Foundry
 
