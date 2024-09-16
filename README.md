@@ -48,6 +48,9 @@ This project is consist of 2 contracts.
         \[
         \frac{\text{Collateral}}{\text{Minted DSC}} = \frac{100}{50} = 200\%
         \]
+        $$
+        \text{Net Worth} = \frac{\text{Total Assets} - \text{Total Liabilities}}{\text{Number of Shares}}
+        $$
     - This is safe because your collateral value is above the required threshold.
 
 
