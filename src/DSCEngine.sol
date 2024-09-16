@@ -2,37 +2,14 @@
 
 // This is considered an Exogenous, Decentralized, Anchored (pegged), Crypto Collateralized low volitility coin
 
-// Layout of Contract:
-// version
-// imports
-// interfaces, libraries, contracts
-// errors
-// Type declarations
-// State variables
-// Events
-// Modifiers
-// Functions
-
-// Layout of Functions:
-// constructor
-// receive function (if exists)
-// fallback function (if exists)
-// external
-// public
-// internal
-// private
-// view & pure functions
-
 pragma solidity ^0.8.18;
 
 import {DecentralizedStableCoin} from "./DecentralizedStableCoin.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {console} from "forge-std/console.sol";
 import {AggregatorV3Interface} from
     "lib/chainlink-brownie-contracts/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import {OracleLib} from "./libraries/OracleLib.sol";
-// import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 /**
  * @title DSCEngine
@@ -68,7 +45,6 @@ contract DSCEngine is ReentrancyGuard {
     // Types //
     ///////////
     using OracleLib for AggregatorV3Interface;
-
 
     ///////////////////////
     /// State Variables ///
@@ -168,15 +144,6 @@ contract DSCEngine is ReentrancyGuard {
         //redeemCollateral already checking health factor
     }
 
-    // if we do start nearing undercollaterized, we need someone to liquidate positions
-    // $100 ETH backing $50 DSC
-    // $20 ETH backing $50 DSC (now DSC not worth $1
-
-    //$75 ETH backing $50 DSC
-    // Liquidator take $75 ETH backing if burns off the $50 DSC
-
-    // If someone is under collaterized we will pay you to collaterized the.
-
     /**
      * @notice this function will liquidate the user's collateral if they are undercollaterized
      * @param collateral The ERC20 collateral address to liquidated from the user
@@ -199,17 +166,11 @@ contract DSCEngine is ReentrancyGuard {
             revert DSCEngine__HealthFactorOk();
         }
 
-        // we want to burn DSC
-        // Take their collateral
-        // Bad user: $140 USD, $100 DSC
-        // $100 of DSC === ??? ETH?
+        // we want to burn DSC Take their collateral
+        // Bad user: $140 USD, $100 DSC | $100 of DSC === ??? ETH?
         uint256 tokenAmountFromDebtCovered = getTokenAmountFromUSD(collateral, debtToCover);
 
         // and give them a 10% bonus
-        // so we are giving the liquidator a $110 of WETH for 100 DSC
-        // we should implement a feature to liquidate in the event the protocol is insolvent
-        // and sweep extra amounts into a treasury
-        // 0.05 * 0.10 = 0.005 Getting total 0.055
         uint256 bonusCollateral = (tokenAmountFromDebtCovered * LIQUIDATION_BONUS) / LIQUIDATION_PRECISION;
         uint256 totalCollateralToRedeem = tokenAmountFromDebtCovered + bonusCollateral;
         _redeemCollateral(user, msg.sender, collateral, totalCollateralToRedeem);
@@ -247,11 +208,9 @@ contract DSCEngine is ReentrancyGuard {
         }
     }
 
-    // In order to redeem collateral:
-    // 1 health factor must be over 1 after collateral pulled
-    // DRY: don't repeat yourself
-
-    //CEI
+    /**
+     * @notice In order to redeem collateral health factor must be over 1 after collateral pulled
+     */
     function redeemCollateral(address tokenCollateralAddress, uint256 amountCollateral)
         public
         moreThanZero(amountCollateral)
@@ -262,12 +221,12 @@ contract DSCEngine is ReentrancyGuard {
     }
 
     /**
-     * @notice follow CEI (Check-Effects-Interactions) pattern
      * @param amountDscToMint The amount of DSC to mint
      * @notice they must have more collateral value then minimum
      */
     function mintDsc(uint256 amountDscToMint) public moreThanZero(amountDscToMint) nonReentrant {
         s_DSCMinted[msg.sender] += amountDscToMint;
+
         // if they minted too much revert
         _revertIfHealthFactorIsBroken(msg.sender);
         emit DscAmountMinted(msg.sender, amountDscToMint);
@@ -281,7 +240,6 @@ contract DSCEngine is ReentrancyGuard {
         _burnDsc(amount, msg.sender, msg.sender);
         _revertIfHealthFactorIsBroken(msg.sender); //don't think it would exist
     }
-    // function getHealthFactor() external view {}
 
     ///////////////////////////////////
     // Internal and Private function //
@@ -323,11 +281,8 @@ contract DSCEngine is ReentrancyGuard {
         return _calculateHealthFactor(totalDscMinted, collateralValueInUsd);
     }
 
-    // check Health Factor(do they have enough collateral)
-    // Revert if Health Factor is broken
     function _revertIfHealthFactorIsBroken(address user) internal view {
         uint256 userHealthFactor = _healthFactor(user);
-        // console.log("userHealthFactor",userHealthFactor);
         if (userHealthFactor < MIN_HEALTH_FACTOR) {
             revert DSCEngine__BreaksHealthFactor(userHealthFactor);
         }
@@ -336,10 +291,8 @@ contract DSCEngine is ReentrancyGuard {
     function _getUsdValue(address token, uint256 amount) private view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
         // ( ,int256 price,,,) = priceFeed.latestRoundData()
-        (, int256 price,,,) = priceFeed.staleCheckLatestRoundData();
+        (, int256 price,,,) = priceFeed.staleCheckLatestRoundData(); // Lib use
 
-        // 1 ETH = $1000
-        // Price return from the CL = 1000 * 1e8
         return (uint256(price) * amount) / PRICE_PRECISION; // (1000 * 1e8 * (1e10)) * PRECISION1000 * 1e18
     }
 
@@ -364,6 +317,7 @@ contract DSCEngine is ReentrancyGuard {
         uint256 collateralAdjustedForThreshold = (collateralValueInUsd * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
         return (collateralAdjustedForThreshold * PRECISION) / totalDscMinted;
     }
+
     ////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
     // PUblic & External View & Pure Functions
@@ -373,16 +327,10 @@ contract DSCEngine is ReentrancyGuard {
     function getTokenAmountFromUSD(address token, uint256 usdAmountInWei) public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
         (, int256 price,,,) = priceFeed.staleCheckLatestRoundData();
-        // $/ETH ETH?
-        // $2000 / ETH. $1000 = 0.5 ETH
         return (usdAmountInWei * PRECISION) / (uint256(price) * ADDITIONAL_PRICE_PRECISION);
-        // ($1000 * 1e18) / ($3000e8 * 1e10)
-        //5 * 1e17
     }
 
     function getAccountCollateralValue(address user) public view returns (uint256 totalCollateralValueInUsd) {
-        // loop through each token, get the amount they have deposited. Map it to
-        // the price feed and get the value in USD
         for (uint256 index = 0; index < s_collateralToken.length; index++) {
             address token = s_collateralToken[index];
             uint256 amount = s_CollateralDeposited[user][token];

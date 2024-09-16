@@ -1,6 +1,4 @@
-## DeFi StableCoin 
-
-### About
+## About (DeFi StableCoin) 
 The Decentralized Stablecoin (DSC) project is a secure, trustless, and permissionless stablecoin protocol designed to maintain a stable value while being backed by a pool of decentralized collateral. Unlike traditional stablecoins, DSC is not reliant on fiat reserves but is instead backed by over-collateralized assets like Ethereum.
 
 This project is consist of 2 contracts. 
@@ -8,7 +6,7 @@ This project is consist of 2 contracts.
    2. A protocol to manage the stability of DSC(Token). To keeping the token value maintain with the help of collateral.
 
 
-## Key Components
+### Key Components
 - DSC (Decentralized Stablecoin): A fully decentralized stablecoin pegged to a stable value (e.g., USD) and backed by crypto collateral (wETH, wBTC).
 
 - DSCEngine: The core smart contract that manages the issuance, redemption, and liquidation of DSC tokens. It ensures the system remains solvent by enforcing collateralization ratios, handling liquidation events, and enabling users to mint DSC by locking up collateral.
@@ -85,6 +83,27 @@ This project is consist of 2 contracts.
 - **You** lose:
     - Your collateral of **$90 ETH**.
     - The liquidator walks away with **$55 ETH**, leaving you with only **$35 ETH** (since you were undercollateralized).
+
+### Layout of Contract:
+ **version**
+ **imports**
+ **interfaces, libraries, contracts**
+ **errors**
+ **Type declarations**
+ **State variables**
+ **Events**
+ **Modifiers** 
+ **Functions**
+
+### Layout of Functions:
+**constructor**
+**receive function (if exists)**
+**fallback function (if exists)**
+**external**
+**public**
+**internal**
+**private**
+**view & pure functions**
   
 ## Foundry
 
