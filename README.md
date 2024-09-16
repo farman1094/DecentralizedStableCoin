@@ -45,8 +45,7 @@ This project is consist of 2 contracts.
     - You deposit **$100 worth of ETH**.
     - You mint **$50 DSC**.
     - At this point, you're collateralized at **200%** because:
-        ![Formula](https://latex.codecogs.com/png.latex?\frac{\text{Collateral}}{\text{Minted%20DSC}}=\frac{100}{50}=200\%)
-    
+        Collateral / Minted DSC = 100 / 50 = 200%    
     - This is safe because your collateral value is above the required threshold.
 
 
