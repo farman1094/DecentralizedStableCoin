@@ -96,14 +96,14 @@ This project is consist of 2 contracts.
 - Functions
 
 ### Layout of Functions:
-**constructor**  
-**receive function (if exists)**  
-**fallback function (if exists)**  
-**external**  
-**public**  
-**internal**  
-**private**  
-**view & pure functions**  
+- constructor
+- receive function (if exists)  
+- fallback function (if exists)  
+- external  
+- public  
+- internal  
+- private
+- view & pure functions
   
 ## Foundry
 
