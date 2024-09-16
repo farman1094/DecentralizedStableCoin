@@ -1,4 +1,5 @@
-## About (DeFi StableCoin) 
+# About 
+## DeFi StableCoin 
 The Decentralized Stablecoin (DSC) project is a secure, trustless, and permissionless stablecoin protocol designed to maintain a stable value while being backed by a pool of decentralized collateral. Unlike traditional stablecoins, DSC is not reliant on fiat reserves but is instead backed by over-collateralized assets like Ethereum.
 
 This project is consist of 2 contracts. 
