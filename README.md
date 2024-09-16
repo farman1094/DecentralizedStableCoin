@@ -44,7 +44,7 @@ This project is consist of 2 contracts.
 2. **Collateral & Minting**:
     - You deposit **$100 worth of ETH**.
     - You mint **$50 DSC**.
-    - At this point, you're collateralized at **200%** because:
+    - At this point, you're collateralized at **200%** because:  
         Collateral / Minted DSC = 100 / 50 = 200%    
     - This is safe because your collateral value is above the required threshold.
 
@@ -53,7 +53,7 @@ This project is consist of 2 contracts.
 ### Liquidation Scenario:
 3. **Price Drop**:
     - The value of your collateral drops from **$100 ETH** to **$90 ETH**.
-    - Now, your collateralization ratio is:
+    - Now, your collateralization ratio is:  
         90 ÷ 50 = 180%
     - This is **below the 200% threshold**, meaning your position is **undercollateralized** and open to liquidation.
 
