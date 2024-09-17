@@ -49,6 +49,20 @@ contract DSCEngineTest is Test {
         engine = new DSCEngine(tokenAddresses, priceFeedAddresses, address(dsc));
     }
 
+    //////////////////////////
+    // Initialization Test ///
+    //////////////////////////
+    function testToGetCollateralToken()public view {
+        (bool success, address[] memory random) = engine.getCollateralToken();
+        if(success){
+            for(uint256 index = 0; index < random.length; index++){ 
+            console.log( random[index]);
+        }
+        }
+
+    }
+
+
     //////////////////////
     // Price Feed Test ///
     /////////////////////
@@ -94,6 +108,7 @@ contract DSCEngineTest is Test {
     /////////////////////////////
     // Depost Collateral Test ///
     /////////////////////////////
+
     function testRevertsIfCollateralZero() public {
         vm.startPrank(USER);
         ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
@@ -260,4 +275,5 @@ contract DSCEngineTest is Test {
         console.log("Tokens: ", tokens[0]);
         console.log("Tokens2: ", tokens[1]);
     }
+
 }
