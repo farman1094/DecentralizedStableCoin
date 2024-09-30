@@ -414,4 +414,11 @@ contract DSCEngine is ReentrancyGuard {
     function getLiquidationPrecision() external pure returns (uint256) {
         return LIQUIDATION_PRECISION;
     }
+
+    function getCollateralToken() external view returns (bool, address [] memory){
+        if(s_collateralToken.length > 0){
+                return (true, s_collateralToken);
+        }
+                return (false, s_collateralToken);
+    }
 }
