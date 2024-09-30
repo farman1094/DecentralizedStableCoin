@@ -29,16 +29,12 @@ contract DSCEngineTest is Test {
     uint256 public constant AMOUNT_COLLATERAL = 10 ether;
     uint256 public constant STARTING_USER_BALANCE = 100 ether;
 
-
     // Events
-     event CollateralDeposited(address indexed user, address indexed token, uint256 indexed amount);
+    event CollateralDeposited(address indexed user, address indexed token, uint256 indexed amount);
     event DscAmountMinted(address indexed user, uint256 indexed amount);
     event CollateralRedeemed(
         address indexed redeemedFrom, address indexed redeemedTo, address indexed token, uint256 amount
     );
-
-
-
 
     function setUp() public {
         deployer = new DeployDSC();
@@ -118,6 +114,7 @@ contract DSCEngineTest is Test {
         engine.depositCollateral(weth, AMOUNT_COLLATERAL);
         vm.stopPrank();
     }
+
     function testRevertsIfCollateralZero() public {
         vm.startPrank(USER);
         ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
@@ -186,7 +183,6 @@ contract DSCEngineTest is Test {
         vm.stopPrank();
     }
 
-
     function testToCheckDscAmountMintedExpectEmit() public depositCollateral {
         vm.startPrank(USER);
         ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
@@ -215,13 +211,12 @@ contract DSCEngineTest is Test {
     // Redeem Collateral Test ///
     /////////////////////////////
 
-
-       function testToCheckCollateralRedeemedExpectEmit() public depositCollateral {
+    function testToCheckCollateralRedeemedExpectEmit() public depositCollateral {
         vm.startPrank(USER);
         ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
 
         vm.expectEmit(true, true, true, true);
-        emit CollateralRedeemed(USER,USER, weth, AMOUNT_COLLATERAL);
+        emit CollateralRedeemed(USER, USER, weth, AMOUNT_COLLATERAL);
         engine.redeemCollateral(weth, AMOUNT_COLLATERAL);
         vm.stopPrank();
     }
@@ -308,14 +303,13 @@ contract DSCEngineTest is Test {
         console.log("Tokens2: ", tokens[1]);
     }
 
-
     ////////////////////////
     //// Liquidation Test //
     ////////////////////////
 
     function testToRevertDSCEngine__HealthFactorOk() public depositCollateralAndMintDSC {
         vm.expectRevert(DSCEngine.DSCEngine__HealthFactorOk.selector);
-        engine.liquidate( weth, USER, 10 ether );
+        engine.liquidate(weth, USER, 10 ether);
     }
 
     function testForLiquidity() public {
@@ -339,7 +333,7 @@ contract DSCEngineTest is Test {
         vm.stopPrank();
     }
 
-      function testForLiquidityDSCEngine__HealthFactorNotImproved() public {
+    function testForLiquidityDSCEngine__HealthFactorNotImproved() public {
         vm.startPrank(USER);
         ERC20Mock(weth).approve(address(engine), 1 ether);
         engine.depositCollateralAndMintDSC(weth, 1 ether, 1000 ether);

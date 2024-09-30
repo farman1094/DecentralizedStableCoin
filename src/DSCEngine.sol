@@ -415,10 +415,10 @@ contract DSCEngine is ReentrancyGuard {
         return LIQUIDATION_PRECISION;
     }
 
-    function getCollateralToken() external view returns (bool, address [] memory){
-        if(s_collateralToken.length > 0){
-                return (true, s_collateralToken);
+    function getCollateralToken() external view returns (bool, address[] memory) {
+        if (s_collateralToken.length > 0) {
+            return (true, s_collateralToken);
         }
-                return (false, s_collateralToken);
+        return (false, s_collateralToken);
     }
 }
