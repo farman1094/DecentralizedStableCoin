@@ -168,12 +168,16 @@ contract DSCEngine is ReentrancyGuard {
 
         // we want to burn DSC Take their collateral
         // Bad user: $140 USD, $100 DSC | $100 of DSC === ??? ETH?
+
         uint256 tokenAmountFromDebtCovered = getTokenAmountFromUSD(collateral, debtToCover);
 
         // and give them a 10% bonus
         uint256 bonusCollateral = (tokenAmountFromDebtCovered * LIQUIDATION_BONUS) / LIQUIDATION_PRECISION;
+
         uint256 totalCollateralToRedeem = tokenAmountFromDebtCovered + bonusCollateral;
+
         _redeemCollateral(user, msg.sender, collateral, totalCollateralToRedeem);
+
         // burn dsc
         _burnDsc(debtToCover, user, msg.sender);
 
@@ -301,7 +305,7 @@ contract DSCEngine is ReentrancyGuard {
         view
         returns (uint256 totalDscMinted, uint256 collateralValueInUsd)
     {
-        totalDscMinted = s_DSCMinted[msg.sender];
+        totalDscMinted = s_DSCMinted[user];
         collateralValueInUsd = getAccountCollateralValue(user);
         return (totalDscMinted, collateralValueInUsd);
     }
@@ -324,6 +328,7 @@ contract DSCEngine is ReentrancyGuard {
     ////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
 
+    // Get the token require by the amount of USDfc
     function getTokenAmountFromUSD(address token, uint256 usdAmountInWei) public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
         (, int256 price,,,) = priceFeed.staleCheckLatestRoundData();
