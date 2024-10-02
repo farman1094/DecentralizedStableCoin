@@ -421,4 +421,8 @@ contract DSCEngine is ReentrancyGuard {
         }
         return (false, s_collateralToken);
     }
+
+    function getDscTokenSupply(address user) external view returns(uint256) {
+        return s_DSCMinted[user];
+    }
 }

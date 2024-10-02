@@ -292,7 +292,7 @@ contract DSCEngineTest is Test {
     function testToCheckIfBurnDscIsWorking() public depositCollateralAndMintDSC {
         vm.startPrank(USER);
         engine.burnDsc(AMOUNT_COLLATERAL);
-        (uint256 AfterBurningAmount,) = engine.getAccountInformation(USER);
+        uint256 AfterBurningAmount = engine.getDscTokenSupply(USER);
         uint256 expecBalAfterBurning = 0;
         assertEq(AfterBurningAmount, expecBalAfterBurning);
     }
@@ -312,25 +312,37 @@ contract DSCEngineTest is Test {
         engine.liquidate(weth, USER, 10 ether);
     }
 
-    function testForLiquidity() public {
-        vm.startPrank(USER);
-        ERC20Mock(weth).approve(address(engine), 1 ether);
-        engine.depositCollateralAndMintDSC(weth, 1 ether, 1000 ether);
-
-        int256 updateAnswer = 1500e8;
-        MockV3Aggregator(ethUsdPriceFeed).updateAnswer(updateAnswer);
-        uint256 userHealthFactor = engine.getHealthFactor(USER);
-        console.log("User Health Factor: ", userHealthFactor);
-        vm.stopPrank();
-
-        vm.startPrank(liquidator);
-        ERC20Mock(weth).approve(address(engine), 10 ether);
-        engine.depositCollateralAndMintDSC(weth, 10 ether, 1000 ether);
-        dsc.approve(address(engine), 1000 ether);
-        // engine.liquidate(weth, USER, 999);
-        // engine.liquidate(weth, USER, 1000);
-        engine.liquidate(weth, USER, 200e18);
-        vm.stopPrank();
+ function testForLiquiditypass() public { 
+        vm.startPrank(USER); 
+        ERC20Mock(weth).approve(address(engine), 1 ether); 
+        engine.depositCollateralAndMintDSC(weth, 1 ether, 1000 ether); 
+ 
+        int256 updateAnswer = 1500e8; 
+        MockV3Aggregator(ethUsdPriceFeed).updateAnswer(updateAnswer); 
+        uint256 userHealthFactor = engine.getHealthFactor(USER); 
+        console.log("User Health Factor: ", userHealthFactor); 
+        vm.stopPrank(); 
+ 
+        vm.startPrank(liquidator); 
+        ERC20Mock(weth).approve(address(engine), 10 ether); 
+        engine.depositCollateralAndMintDSC(weth, 10 ether, 1000 ether); 
+        dsc.approve(address(engine), 1000 ether); 
+        // engine.liquidate(weth, USER, 999); 
+        // engine.liquidate(weth, USER, 1000); 
+        uint256 totalDscMinted = engine.getDscTokenSupply(liquidator); 
+        uint256 totalSupply = dsc.totalSupply();
+        console.log("Total DSC Supply: ", totalSupply); 
+        console.log("Total DSC Minted: ", totalDscMinted); 
+        // console.log("Collateral Value in USD: ", collateralValueInUsd); 
+ 
+        engine.liquidate(weth, USER, 1000e18); 
+        uint256 totalDscMintedAfterLiquidity = engine.getDscTokenSupply(liquidator); 
+        uint256 totalSupplyAfterLiquidity = dsc.totalSupply();
+        console.log("totalSupplyAfterLiquidity: ", totalSupplyAfterLiquidity); 
+        console.log("totalDscMintedAfterLiquidity: ", totalDscMintedAfterLiquidity); 
+        // console.log("collateralValueInUsdAfterLiquidity: ", collateralValueInUsdAfterLiquidity); 
+         
+        vm.stopPrank(); 
     }
 
     function testForLiquidityDSCEngine__HealthFactorNotImproved() public {
