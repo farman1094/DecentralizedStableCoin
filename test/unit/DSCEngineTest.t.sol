@@ -291,8 +291,9 @@ contract DSCEngineTest is Test {
 
     function testToCheckIfBurnDscIsWorking() public depositCollateralAndMintDSC {
         vm.startPrank(USER);
+        uint256 beforeBurning = engine.getDscTokenMintedByUser(USER);
         engine.burnDsc(AMOUNT_COLLATERAL);
-        uint256 AfterBurningAmount = engine.getDscTokenSupply(USER);
+        uint256 AfterBurningAmount = engine.getDscTokenMintedByUser(USER);
         uint256 expecBalAfterBurning = 0;
         assertEq(AfterBurningAmount, expecBalAfterBurning);
     }
@@ -329,18 +330,21 @@ contract DSCEngineTest is Test {
         dsc.approve(address(engine), 1000 ether); 
         // engine.liquidate(weth, USER, 999); 
         // engine.liquidate(weth, USER, 1000); 
-        uint256 totalDscMinted = engine.getDscTokenSupply(liquidator); 
+        uint256 totalDscMinted = engine.getDscTokenMintedByUser(liquidator); 
         uint256 totalSupply = dsc.totalSupply();
         console.log("Total DSC Supply: ", totalSupply); 
         console.log("Total DSC Minted: ", totalDscMinted); 
         // console.log("Collateral Value in USD: ", collateralValueInUsd); 
  
         engine.liquidate(weth, USER, 1000e18); 
-        uint256 totalDscMintedAfterLiquidity = engine.getDscTokenSupply(liquidator); 
+        
+        uint256 totalDscMintedAfterLiquidity = engine.getDscTokenMintedByUser(liquidator); 
         uint256 totalSupplyAfterLiquidity = dsc.totalSupply();
         console.log("totalSupplyAfterLiquidity: ", totalSupplyAfterLiquidity); 
         console.log("totalDscMintedAfterLiquidity: ", totalDscMintedAfterLiquidity); 
         // console.log("collateralValueInUsdAfterLiquidity: ", collateralValueInUsdAfterLiquidity); 
+        totalDscMintedAfterLiquidity = engine.getDscTokenMintedByUser(USER); 
+        console.log("totalSupplyAfterLiquidity: ", totalSupplyAfterLiquidity); 
          
         vm.stopPrank(); 
     }
