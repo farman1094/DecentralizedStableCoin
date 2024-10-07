@@ -41,7 +41,7 @@ contract DSCEngineTest is Test {
         (dsc, engine, helper) = deployer.run();
         (ethUsdPriceFeed, btcUsdPriceFeed, weth, wbtc,) = helper.activeNetworkConfig();
         ERC20Mock(weth).mint(USER, STARTING_USER_BALANCE);
-        ERC20Mock(weth).mint(liquidator, STARTING_USER_BALANCE);
+        ERC20Mock(weth).mint(liquidator,  STARTING_USER_BALANCE);
     }
     ////////////////////////
     // Constructor Test ///
@@ -291,7 +291,6 @@ contract DSCEngineTest is Test {
 
     function testToCheckIfBurnDscIsWorking() public depositCollateralAndMintDSC {
         vm.startPrank(USER);
-        uint256 beforeBurning = engine.getDscTokenMintedByUser(USER);
         engine.burnDsc(AMOUNT_COLLATERAL);
         uint256 AfterBurningAmount = engine.getDscTokenMintedByUser(USER);
         uint256 expecBalAfterBurning = 0;
@@ -313,40 +312,65 @@ contract DSCEngineTest is Test {
         engine.liquidate(weth, USER, 10 ether);
     }
 
- function testForLiquiditypass() public { 
+ function testForLiquiditypassWithoutAfter() public { 
+    //setup
         vm.startPrank(USER); 
         ERC20Mock(weth).approve(address(engine), 1 ether); 
         engine.depositCollateralAndMintDSC(weth, 1 ether, 1000 ether); 
  
         int256 updateAnswer = 1500e8; 
         MockV3Aggregator(ethUsdPriceFeed).updateAnswer(updateAnswer); 
-        uint256 userHealthFactor = engine.getHealthFactor(USER); 
-        console.log("User Health Factor: ", userHealthFactor); 
+        // uint256 userHealthFactor = engine.getHealthFactor(USER); 
         vm.stopPrank(); 
  
         vm.startPrank(liquidator); 
-        ERC20Mock(weth).approve(address(engine), 10 ether); 
-        engine.depositCollateralAndMintDSC(weth, 10 ether, 1000 ether); 
+        ERC20Mock(weth).approve(address(engine), 2 ether); 
+        engine.depositCollateralAndMintDSC(weth, 2 ether, 1000 ether); 
         dsc.approve(address(engine), 1000 ether); 
-        // engine.liquidate(weth, USER, 999); 
-        // engine.liquidate(weth, USER, 1000); 
-        uint256 totalDscMinted = engine.getDscTokenMintedByUser(liquidator); 
-        uint256 totalSupply = dsc.totalSupply();
-        console.log("Total DSC Supply: ", totalSupply); 
-        console.log("Total DSC Minted: ", totalDscMinted); 
-        // console.log("Collateral Value in USD: ", collateralValueInUsd); 
- 
+
+        (uint256 userBeforeLiquidityDSC, uint256 userBeforeLiquidity)= engine.getAccountInformation(USER); 
+        (uint256 liquidatorBeforeLiquidityDSC, uint256 liquidatorBeforeLiquidity)= engine.getAccountInformation(liquidator); 
+        consolesBefore(userBeforeLiquidityDSC,  userBeforeLiquidity,  liquidatorBeforeLiquidityDSC,  liquidatorBeforeLiquidity);
+        
+        //liquidate
         engine.liquidate(weth, USER, 1000e18); 
         
-        uint256 totalDscMintedAfterLiquidity = engine.getDscTokenMintedByUser(liquidator); 
-        uint256 totalSupplyAfterLiquidity = dsc.totalSupply();
-        console.log("totalSupplyAfterLiquidity: ", totalSupplyAfterLiquidity); 
-        console.log("totalDscMintedAfterLiquidity: ", totalDscMintedAfterLiquidity); 
-        // console.log("collateralValueInUsdAfterLiquidity: ", collateralValueInUsdAfterLiquidity); 
-        totalDscMintedAfterLiquidity = engine.getDscTokenMintedByUser(USER); 
-        console.log("totalSupplyAfterLiquidity: ", totalSupplyAfterLiquidity); 
-         
+        //Effects
+        (uint256 userAfterLiquidityDSC, uint256 userAfterLiquidity)= engine.getAccountInformation(USER); 
+        (uint256 liquidatorAfterLiquidityDSC, uint256 liquidatorAfterLiquidity)= engine.getAccountInformation(liquidator); 
+        consolesAfter(userAfterLiquidityDSC, userAfterLiquidity, liquidatorAfterLiquidityDSC, liquidatorAfterLiquidity);
+       
         vm.stopPrank(); 
+    }
+
+
+    function testForLiquiditypassAfter() public {
+        testForLiquiditypassWithoutAfter();
+        vm.startPrank(liquidator); 
+        engine.mintDsc(500 ether);
+        // engine.mintDsc(1000);
+        (uint256 dscAmount, uint256 collateral)= engine.getAccountInformation(liquidator); 
+        console.log("dscAmount: %e" ,dscAmount);
+        console.log("collateral: %e", collateral);
+
+        vm.stopPrank(); 
+
+    }
+
+
+
+    function consolesBefore(uint256 userBeforeLiquidityDSC, uint256 userBeforeLiquidity, uint256 liquidatorBeforeLiquidityDSC, uint256 liquidatorBeforeLiquidity) public pure {
+        console.log("Before DSC value USER: %e", userBeforeLiquidityDSC); 
+        console.log("Before Collateral of USER: %e", userBeforeLiquidity); 
+        console.log("Before DSC Value Liquidator: %e", liquidatorBeforeLiquidityDSC); 
+        console.log("Before Collateral of Liquidator: %e", liquidatorBeforeLiquidity ); 
+    }
+
+     function consolesAfter(uint256 userAfterLiquidityDSC, uint256 userAfterLiquidity, uint256 liquidatorAfterLiquidityDSC, uint256 liquidatorAfterLiquidity) public pure {
+        console.log("After DSC value USER: %e", userAfterLiquidityDSC); 
+        console.log("After Collateral of USER: %e", userAfterLiquidity); 
+        console.log("After DSC Value Liquidator: %e", liquidatorAfterLiquidityDSC); 
+        console.log("After Collateral of Liquidator: %e", liquidatorAfterLiquidity); 
     }
 
     function testForLiquidityDSCEngine__HealthFactorNotImproved() public {
